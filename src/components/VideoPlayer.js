@@ -4,11 +4,37 @@ import '../VideoPlayer.css';
 const VideoPlayer = ({ src }) => {
   const video = useRef();
   const playBtn = useRef();
-  const muteBtn = useRef();
-  const inputVolume = useRef();
   const inputProgress = useRef();
+  const muteBtn = useRef();
   const duration = useRef();
   const elapsed = useRef();
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFS, setFS] = useState(false);
+
+  const handlePlay = () => {
+    if (isPlaying) {
+      video.current.pause();
+      setIsPlaying(false);
+    } else {
+      video.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const handleFullScreen = () => {
+    if (!isFS) {
+      video.current.parentNode.requestFullscreen();
+      setFS(true);
+    } else {
+      document.exitFullscreen();
+      setFS(false);
+    }
+  };
+
+  const handleVolume = ({ target: { value } }) => {
+    video.current.volume = value;
+  };
 
   const setDuration = () => {
     const minutesDuration = Math.floor(video.current.duration / 60);
@@ -31,8 +57,6 @@ const VideoPlayer = ({ src }) => {
     let vidDuration = `${minuteDuration}:${secondDuration}`;
     duration.current.innerHTML = vidDuration;
     inputProgress.current.max = video.current.duration;
-    playBtn.current.firstChild.classList.remove('fa-pause');
-    playBtn.current.firstChild.classList.add('fa-play');
   };
 
   const setProgress = () => {
@@ -42,13 +66,13 @@ const VideoPlayer = ({ src }) => {
     let secondValue;
 
     if (minutes < 10) {
-      minuteValue = '0' + minutes;
+      minuteValue = `0${minutes}`;
     } else {
       minuteValue = minutes;
     }
 
     if (seconds < 10) {
-      secondValue = '0' + seconds;
+      secondValue = `0${seconds}`;
     } else {
       secondValue = seconds;
     }
@@ -60,28 +84,37 @@ const VideoPlayer = ({ src }) => {
 
   return (
     <div className='video-container'>
-      <video src={src} ref={video} style={{ pointerEvents: 'none' }}></video>
+      <video
+        src={src}
+        ref={video}
+        style={{ pointerEvents: 'none' }}
+        onLoadedData={setDuration}
+        onTimeUpdate={setProgress}
+      ></video>
       <div className='video-controls hidden'>
         <div className='video-progress'>
           <input
             className='volume'
             type='range'
-            ref={inputProgress}
             defaultValue='0'
             min='0.0'
+            ref={inputProgress}
           />
           <div className='seek-tooltip'>00:00</div>
         </div>
 
         <div className='bottom-controls'>
           <div className='left-controls'>
-            <button ref={playBtn}>
-              <i className='text-light fas fa-play'> </i>
+            <button ref={playBtn} onClick={handlePlay}>
+              <i
+                className={`text-light fas fa-${isPlaying ? 'pause' : 'play'}`}
+              >
+                {' '}
+              </i>
             </button>
             <button>
               <i className='fas fa-redo text-light'></i>
             </button>
-
             <div className='volume-controls'>
               <button ref={muteBtn}>
                 <i className='fas fa-volume-up text-light'></i>
@@ -90,11 +123,11 @@ const VideoPlayer = ({ src }) => {
               <input
                 className='volume'
                 type='range'
-                ref={inputVolume}
                 defaultValue='.5'
                 min='0.0'
                 max='1.0'
                 step='.01'
+                onChange={handleVolume}
               />
             </div>
 
@@ -109,8 +142,10 @@ const VideoPlayer = ({ src }) => {
             <button>
               <i className='fas fa-sign-out-alt text-light'></i>
             </button>
-            <button>
-              <i className='text-light fas fa-expand'> </i>
+            <button onClick={handleFullScreen}>
+              <i
+                className={`text-light fas fa-${isFS ? 'compress' : 'expand'}`}
+              ></i>
             </button>
           </div>
         </div>

@@ -2,9 +2,6 @@ import React from 'react';
 import movies from '../utils/movies';
 
 const Sidebar = ({ setCurrentVideo }) => {
-  const handleClick = src => {
-    setCurrentVideo(src);
-  };
   return movies.map(({ title, thumb, sources }) => (
     <img
       style={{ cursor: 'pointer' }}
@@ -13,7 +10,7 @@ const Sidebar = ({ setCurrentVideo }) => {
       src={thumb}
       alt={title}
       data-url={sources}
-      onClick={() => handleClick(sources)}
+      onClick={() => setCurrentVideo(sources)}
     />
   ));
 };
